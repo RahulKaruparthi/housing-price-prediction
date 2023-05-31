@@ -718,6 +718,45 @@ _create_task_collection(
     setup_ci_env,
 )
 
+@task(name="complexity_score")
+def complexity_score(
+    c,
+    vendor = False,
+    classification = False,
+    core = False,
+    data = False,
+    eda = False,
+    hpp = True,
+    mmx = False,
+    regression = False,
+    reports = False,
+    notebooks = False,
+    all = False
+):
+    ll = {
+        '_vendor' : vendor, 'classification' : classification,
+        'core' : core, 'data_processing' : data, 
+        'eda': eda, 'hpp' : hpp, 'mmx' : mmx, 'regression' : regression,
+        'reports' : reports
+    }
+
+    if notebooks:
+        c.run("radon cc --total-average --include-ipynb notebooks/")
+
+    if all:
+        for i in ll:
+            c.run(f"radon cc  --total-average --include-ipynb src/ta_lib/{i}/")
+        c.run("radon cc --total-average --include-ipynb notebooks/")
+    else:
+        for i in ll:
+            if ll[i]:
+                c.run(f"radon cc  --total-average --include-ipynb src/ta_lib/{i}/")
+
+
+_create_task_collection(
+    "cc",
+    complexity_score,
+)
 
 # -------------
 # Test/QC tasks
